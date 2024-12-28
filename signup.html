@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup</title>
+  <style>
+    /* Basic styling (same as before) */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("your-background-image.jpg") no-repeat center center fixed;
+      background-size: cover;
+    }
+    video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 1rem;
+    }
+
+    .form-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .form-box h1 {
+      margin-bottom: 1.5rem;
+      color: #f4f4f4;
+    }
+
+    .form-box button {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.7rem;
+      background: black;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .form-box button:hover {
+      background: #005fa3;
+    }
+
+    .form-box input {
+      width: 100%;
+      padding: 0.5rem 0;
+      margin: 0.5rem 0;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .form-box p {
+      margin-top: 1rem;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .form-box p a {
+      color: #00aced;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <video autoplay muted loop playsinline>
+  <source src="videos\bg.mp4" type="video/mp4">
+  
+</video>
+  <div class="container">
+    <div class="form-box">
+      <h1>Signup</h1>
+      <button>Continue with Google</button>
+      <button>Continue with Apple</button>
+
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <input type="password" id="repeat-password" placeholder="Repeat Password" required>
+
+      <button id="signup-button">Sign Up</button>
+
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4IXCgY29AqldWI5UjLQNSv4rcP_4mDXs",
+      authDomain: "luna-f7744.firebaseapp.com",
+      databaseURL: "https://luna-f7744-default-rtdb.firebaseio.com",
+      projectId: "luna-f7744",
+      storageBucket: "luna-f7744.firebasestorage.app",
+      messagingSenderId: "372966314072",
+      appId: "1:372966314072:web:7ed45036c167dd35573a2d",
+      measurementId: "G-GK6QQRM1MM"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    document.getElementById('signup-button').addEventListener('click', () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const repeatPassword = document.getElementById('repeat-password').value;
+
+      if (email && password && repeatPassword) {
+        if (password !== repeatPassword) {
+          alert("Passwords do not match.");
+          return;
+        }
+
+        const userRef = ref(database, email.replace(/[@.]/g, '_')); // Using email as key
+
+        set(userRef, {
+          Email: email,
+          Password: password
+        }).then(() => {
+          // Store the email in localStorage after successful signup
+          localStorage.setItem('email', email);
+
+          alert('Signup successful!');
+          window.location.href = "sleep tracker.html";
+        }).catch((error) => {
+          alert('Error: ' + error.message);
+        });
+      } else {
+        alert('Please fill in all fields.');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Sleep Tracker</title>
+  <!-- Include Chart.js library -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* General Styling */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("C:\Users\shoen\OneDrive\Documents\Luna Genie\videos\sleeptrack.mp4") no-repeat center center fixed;
+      background-size: cover;
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    /* Header Styling */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 1rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .header button {
+      background: transparent;
+      border: 1px solid white;
+      color: white;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .header button:hover {
+      background: white;
+      color: black;
+    }
+
+    /* Side Navigation Styling */
+    .side-nav {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1001;
+      top: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.9);
+      overflow-x: hidden;
+      transition: 0.5s;
+      padding-top: 60px;
+    }
+
+    .side-nav a {
+      padding: 8px 8px 8px 32px;
+      text-decoration: none;
+      font-size: 1.5rem;
+      color: white;
+      display: block;
+      transition: 0.3s;
+    }
+
+    .side-nav a:hover {
+      color: #f1f1f1;
+    }
+
+    .side-nav .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 25px;
+      font-size: 2rem;
+      cursor: pointer;
+    }
+
+    .open-nav {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .header button {
+        display: none;
+      }
+
+      .open-nav {
+        display: block;
+        font-size: 2rem;
+        cursor: pointer;
+      }
+    }
+
+    /* Buttons Container */
+    .buttons-container {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 2rem;
+      padding: 0 1rem;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      position: relative;
+      width: 22%;
+      height: 10cm;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      margin: 10px;
+    }
+
+    .button:hover {
+      transform: scale(1.05);
+      filter: brightness(1.2);
+    }
+
+    .button img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.7;
+    }
+
+    .button span {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1.5rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    /* Graph Section */
+    .graph-container {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 20px;
+      margin-top: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .graph-box {
+      width: 44%;
+      height: 10cm;
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    /* Mobile optimization */
+    @media (max-width: 768px) {
+      .button {
+        width: 95%;
+        height: 8cm;
+      }
+
+      .graph-container {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .graph-box {
+        width: 90%;
+        height: 8cm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="open-nav" onclick="openNav()">&#9776;</span>
+    <button onclick="location.href='track.html'">Tracker</button>
+    <button onclick="location.href='t11.html'">Profile</button>
+  </div>
+
+  <div id="mySideNav" class="side-nav">
+    <a href="javascript:void(0)" class="close-btn" onclick="closeNav()">&times;</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="profile.html">Profile</a>
+  </div>
+
+  <video autoplay muted loop playsinline>
+    <source src="videos/sleeptrack.mp4" type="video/mp4">
+  </video>
+
+  <div class="buttons-container">
+    <div class="button" onclick="location.href='sa.html'">
+      <img src="images/journal.jpg" alt="Sleep Aids">
+      <span>SLEEP AIDS</span>
+    </div>
+    <div class="button" onclick="location.href='m.html'">
+      <img src="images/Mind.png" alt="Exercise">
+      <span>EXERCISE</span>
+    </div>
+    <div class="button" onclick="location.href='s.html'">
+      <img src="images/story.jpg" alt="Story">
+      <span>STORY</span>
+    </div>
+    <div class="button" onclick="location.href='tb.html'">
+      <img src="images/nap.jpg" alt="Take Break">
+      <span>TAKE BREAK</span>
+    </div>
+  </div>
+
+  <div class="graph-container">
+    <div class="graph-box">
+      
+      <canvas id="heartRateGraph"></canvas>
+    </div>
+    <div class="graph-box">
+      
+      <canvas id="oxygenLevelGraph"></canvas>
+    </div>
+  </div>
+
+  <script>
+    function openNav() {
+      document.getElementById("mySideNav").style.width = "250px";
+    }
+
+    function closeNav() {
+      document.getElementById("mySideNav").style.width = "0";
+    }
+
+    function generateRandomData(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // Heart Rate Chart
+    const heartRateGraph = document.getElementById('heartRateGraph').getContext('2d');
+    const heartRateChart = new Chart(heartRateGraph, {
+      type: 'line',
+      data: {
+        labels: ['0', '1', '2', '3', '4', '5'],
+        datasets: [{
+          label: 'Heart Rate',
+          data: Array(6).fill().map(() => generateRandomData(60, 90)),
+          borderColor: '#ff4d4d',
+          pointBackgroundColor: '#ff4d4d',
+          fill: false,
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+
+    // Oxygen Level Chart
+    const oxygenLevelGraph = document.getElementById('oxygenLevelGraph').getContext('2d');
+    const oxygenLevelChart = new Chart(oxygenLevelGraph, {
+      type: 'line',
+      data: {
+        labels: ['0', '1', '2', '3', '4', '5'],
+        datasets: [{
+          label: 'Oxygen Level',
+          data: Array(6).fill().map(() => generateRandomData(95, 100)),
+          borderColor: '#4d94ff',
+          pointBackgroundColor: '#4d94ff',
+          fill: false,
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: false
+          }
+        }
+      }
+    });
+
+    // Real-time data update every 3 seconds
+    setInterval(() => {
+      // Update Heart Rate
+      heartRateChart.data.datasets[0].data.push(generateRandomData(60, 90));
+      heartRateChart.data.labels.push(heartRateChart.data.labels.length);
+      heartRateChart.data.datasets[0].data.shift();
+      heartRateChart.data.labels.shift();
+      heartRateChart.update();
+
+      // Update Oxygen Level
+      oxygenLevelChart.data.datasets[0].data.push(generateRandomData(95, 100));
+      oxygenLevelChart.data.labels.push(oxygenLevelChart.data.labels.length);
+      oxygenLevelChart.data.datasets[0].data.shift();
+      oxygenLevelChart.data.labels.shift();
+      oxygenLevelChart.update();
+    }, 3000);
+  </script>
+</body>
+</html>

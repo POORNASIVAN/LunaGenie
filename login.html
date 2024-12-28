@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Sleep Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      overflow: hidden;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("C:/path/to/your/background.jpg") no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 1rem;
+    }
+
+    .form-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .form-box h1 {
+      margin-bottom: 1.5rem;
+      color: #f4f4f4;
+    }
+
+    .form-box button {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.7rem;
+      background: black;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .form-box button:hover {
+      background: #005fa3;
+    }
+
+    .form-box input {
+      width: 100%;
+      padding: 0.5rem 0;
+      margin: 0.5rem 0;
+      border: none;
+      border-radius: 5px;
+    }
+
+    .form-box p {
+      margin-top: 1rem;
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+
+    .form-box p a {
+      color: #00aced;
+      text-decoration: none;
+    }
+
+    #captcha-container {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      margin: 1rem 0;
+    }
+
+    #captcha-input {
+      padding: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <video autoplay muted loop>
+    <source src="videos\loginbg.mp4" type="video/mp4">
+  </video>
+
+  <div class="container">
+    <div class="form-box">
+      <h1>Login</h1>
+      <button>Continue with Google</button>
+      <input type="email" id="email" placeholder="Email">
+      <input type="password" id="password" placeholder="Password">
+      <p>Please enter the CAPTCHA</p>
+
+      <!-- CAPTCHA Display -->
+      <div id="captcha-container"></div>
+
+      <!-- CAPTCHA Input -->
+      <input type="text" id="captcha-input" placeholder="Enter CAPTCHA">
+
+      <button id="login-button">Login</button>
+
+      <p>Don't have an account? <a href="signup.html">Sign up</a></p>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4IXCgY29AqldWI5UjLQNSv4rcP_4mDXs",
+      authDomain: "luna-f7744.firebaseapp.com",
+      databaseURL: "https://luna-f7744-default-rtdb.firebaseio.com",
+      projectId: "luna-f7744",
+      storageBucket: "luna-f7744.firebasestorage.app",
+      messagingSenderId: "372966314072",
+      appId: "1:372966314072:web:7ed45036c167dd35573a2d",
+      measurementId: "G-GK6QQRM1MM"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // CAPTCHA generation
+    function generateCaptcha() {
+      const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let captcha = '';
+      for (let i = 0; i < 6; i++) {
+        captcha += characters.charAt(Math.floor(Math.random() * characters.length));
+      }
+      document.getElementById('captcha-container').textContent = captcha;
+      return captcha;
+    }
+
+    // On page load, generate CAPTCHA
+    const generatedCaptcha = generateCaptcha();
+
+    document.getElementById('login-button').addEventListener('click', function () {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const captchaInput = document.getElementById('captcha-input').value.trim();
+
+      // CAPTCHA validation
+      if (captchaInput !== generatedCaptcha) {
+        alert('Incorrect CAPTCHA');
+        return;
+      }
+
+      if (email && password) {
+        const emailKey = email.replace(/[@.]/g, '_'); // Replace special characters for Firebase compatibility
+        const userRef = database.ref(emailKey);
+
+        userRef.once('value').then(snapshot => {
+          if (snapshot.exists()) {
+            const userData = snapshot.val();
+            if (userData.Password === password) { // Match with the correct path
+              alert('Login successful!');
+              localStorage.setItem('email', email); // Store email in localStorage
+              window.location.href = 'home.html'; // Redirect to home page
+            } else {
+              alert('Incorrect password');
+            }
+          } else {
+            alert('User not found');
+          }
+        }).catch(error => {
+          alert('Error: ' + error.message);
+        });
+      } else {
+        alert('Please fill in all fields');
+      }
+    });
+  </script>
+</body>
+</html>
