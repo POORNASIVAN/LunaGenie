@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Survey - Sleep Tracker</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      color: white;
+      background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("your-background-image.jpg") no-repeat center center fixed;
+      background-size: cover;
+      overflow-y: auto;
+      height: 100vh;
+    }
+
+    .header {
+      text-align: center;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 1.5rem;
+      font-size: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    .question-box {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      text-align: center;
+    }
+
+    .question-box label {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .question-box input, .question-box select {
+      width: 100%;
+      max-width: 280px;
+      padding: 0.7rem;
+      margin-top: 0.5rem;
+      border: none;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .buttons button {
+      background: black;
+      color: white;
+      padding: 1rem 3rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .buttons button:hover {
+      background: #005fa3;
+    }
+
+    /* Mobile Optimization */
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 1rem;
+        gap: 1rem;
+      }
+
+      .question-box {
+        padding: 1.5rem;
+      }
+
+      .question-box label {
+        font-size: 1rem;
+      }
+
+      .question-box input, .question-box select {
+        width: 100%;
+      }
+
+      .buttons button {
+        padding: 0.8rem 2rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .question-box {
+        padding: 1rem;
+      }
+
+      .question-box label {
+        font-size: 0.9rem;
+      }
+
+      .buttons button {
+        padding: 0.7rem 1.5rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">Sleep Tracker Survey</div>
+  <video autoplay muted loop playsinline>
+    <source src="videos\sleeptrack.mp4" type="video/mp4">
+  </video>
+
+  <div class="container">
+    <div class="question-box">
+      <label for="name">How should we call you?</label>
+      <input type="text" id="name" required>
+    </div>
+    <div class="question-box">
+      <label for="dob">Date of Birth</label>
+      <input type="date" id="dob" required>
+    </div>
+    <div class="question-box">
+      <label for="age">Age</label>
+      <input type="number" id="age" min="1" required>
+    </div>
+    <div class="question-box">
+      <label for="gender">Gender</label>
+      <select id="gender" required>
+        <option value="">Select</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div class="question-box">
+      <label for="pills">Do you currently take sleeping pills?</label>
+      <select id="pills" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+    <div class="question-box">
+      <label for="wake">How long are you awake in bed?</label>
+      <input type="text" id="wake" required>
+    </div>
+    <div class="question-box">
+      <label for="awake">How often do you wake up in the middle of the night?</label>
+      <input type="text" id="awake" required>
+    </div>
+    <div class="question-box">
+      <label for="hour">How many hours of sleep do you get?</label>
+      <input type="number" id="hour" min="1" max="24" required>
+    </div>
+    <div class="question-box">
+      <label for="overt">Do racing thoughts keep you up at night?</label>
+      <select id="overt" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+    <div class="question-box">
+      <label for="howlong">How long have sleep issues affected you?</label>
+      <input type="text" id="howlong" required>
+    </div>
+    <div class="question-box">
+      <label for="disorder">Do you have any psychological disorder?</label>
+      <select id="disorder" required>
+        <option value="">Select</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button id="home-button">Home</button>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4IXCgY29AqldWI5UjLQNSv4rcP_4mDXs",
+      authDomain: "luna-f7744.firebaseapp.com",
+      databaseURL: "https://luna-f7744-default-rtdb.firebaseio.com",
+      projectId: "luna-f7744",
+      storageBucket: "luna-f7744.appspot.com",
+      messagingSenderId: "372966314072",
+      appId: "1:372966314072:web:7ed45036c167dd35573a2d",
+      measurementId: "G-GK6QQRM1MM"
+      
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    document.getElementById('home-button').addEventListener('click', () => {
+      const email = localStorage.getItem('email');
+      if (!email) {
+        alert('Please sign up or log in first.');
+        window.location.href = 'signup.html';
+        return;
+      }
+
+      const data = {
+        name: document.getElementById("name").value,
+        dob: document.getElementById("dob").value,
+        age: document.getElementById("age").value,
+        gender: document.getElementById("gender").value,
+        pills: document.getElementById("pills").value,
+        wake: document.getElementById("wake").value,
+        awake: document.getElementById("awake").value,
+        hour: document.getElementById("hour").value,
+        overt: document.getElementById("overt").value,
+        howlong: document.getElementById("howlong").value,
+        disorder: document.getElementById("disorder").value
+      };
+
+      const userRef = ref(database, email.replace(/[@.]/g, '_') + '/sleepData');
+
+      set(userRef, data)
+        .then(() => {
+          alert('Data saved successfully!');
+          window.location.href = 'home.html';
+        })
+        .catch((error) => {
+          alert('Error saving data: ' + error.message);
+        });
+    });
+  </script>
+</body>
+</html>
