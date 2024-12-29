@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotary Dial with Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        /* Body and Layout */
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(145deg, #0f0f0f, #1c1c1c);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            color: white;
+        }
+         video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .dial {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 15px solid #222;
+            border-radius: 50%;
+            background: radial-gradient(circle, #333, #000);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none;
+        }
+
+        .dial-rotator {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #444, #222);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center;
+            transition: transform 0.1s linear;
+        }
+
+        .value-display {
+            margin-top: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            color: #00bcd4;
+        }
+
+        .reset-button {
+            margin-top: 20px;
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .reset-button:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Dial Numbers */
+        .dial-markings {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dial-markings span {
+            position: absolute;
+            font-size: 16px;
+            color: #fff;
+            transform-origin: center;
+        }
+
+        /* Pointer Styles */
+        .pointer {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 20px solid #ff9800;
+            top: 50%;
+            left: 50%;
+            transform-origin: 50% 100%;
+            transform: translate(-50%, -100%);
+            z-index: 2;
+        }
+
+    </style>
+</head>
+<body>
+    <video autoplay muted loop playsinline>
+  <source src="bg.mp4" type="video/mp4">
+  
+</video>
+
+    <div class="dial" id="dial">
+        <div class="dial-rotator" id="rotator"></div>
+        <div class="dial-markings" id="markings"></div>
+        <!-- Pointer -->
+        <div class="pointer" id="pointer"></div>
+    </div>
+    <div class="value-display" id="valueDisplay">25</div>
+    <button class="reset-button" id="resetButton">Reset</button>
+
+    <script>
+        // Firebase setup
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJ8cXMan4Hu_KnfdV_ulwEHZbpy05aISo",
+            authDomain: "iot-luna.firebaseapp.com",
+            databaseURL: "https://iot-luna-default-rtdb.firebaseio.com",
+            projectId: "iot-luna",
+            storageBucket: "iot-luna.appspot.com",
+            messagingSenderId: "85920498762",
+            appId: "1:85920498762:web:d6b9bc6f729e05d45252b3",
+            measurementId: "G-CSXKF3KE9R"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const dial = document.getElementById('dial');
+        const rotator = document.getElementById('rotator');
+        const pointer = document.getElementById('pointer');
+        const valueDisplay = document.getElementById('valueDisplay');
+        const resetButton = document.getElementById('resetButton');
+
+        let currentValue = 25;
+
+        // Update the dial display and store in Firebase
+        function updateDial() {
+            const rotation = (currentValue - 25) * (360 / 20);  // Scale from 25 to 45
+            rotator.style.transform = `rotate(${rotation}deg)`;
+            pointer.style.transform = `rotate(${rotation}deg) translate(-50%, -100%)`;
+            valueDisplay.textContent = currentValue;
+
+            // Store the current value under 'temp' in Firebase
+            db.ref("temp").set({ value: currentValue });
+        }
+
+        // Mouse interaction
+        dial.addEventListener('mousedown', (e) => {
+            const rect = dial.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            function onMouseMove(event) {
+                const dx = event.clientX - cx;
+                const dy = event.clientY - cy;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 180;
+                currentValue = Math.min(Math.max(Math.round(25 + (angle / 360) * 20), 25), 45);
+                updateDial();
+            }
+
+            function onMouseUp() {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            }
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        });
+
+        // Touch interaction for mobile devices
+        dial.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = dial.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            function onTouchMove(event) {
+                const dx = event.touches[0].clientX - cx;
+                const dy = event.touches[0].clientY - cy;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 180;
+                currentValue = Math.min(Math.max(Math.round(25 + (angle / 360) * 20), 25), 45);
+                updateDial();
+            }
+
+            function onTouchEnd() {
+                window.removeEventListener('touchmove', onTouchMove);
+                window.removeEventListener('touchend', onTouchEnd);
+            }
+
+            window.addEventListener('touchmove', onTouchMove);
+            window.addEventListener('touchend', onTouchEnd);
+        });
+
+        // Reset the dial
+        resetButton.addEventListener('click', () => {
+            currentValue = 25;
+            updateDial();
+        });
+
+        // Initialize the dial state
+        updateDial();
+
+        // Add numbers from 25 to 45 around the dial
+        function setupDialMarkings() {
+            const markings = document.getElementById('markings');
+            const numberSpacing = 360 / 20;
+            for (let i = 25; i <= 45; i++) {
+                const span = document.createElement('span');
+                span.textContent = i;
+                const angle = (i - 25) * numberSpacing;
+                span.style.transform = `rotate(${angle}deg) translate(0, -140px) rotate(${-angle}deg)`;
+                markings.appendChild(span);
+            }
+        }
+
+        setupDialMarkings();
+    </script>
+
+</body>
+</html>
