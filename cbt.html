@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sleep Assessment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e1e2f, #2c3e50);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: rgba(44, 62, 80, 0.8);
+            backdrop-filter: blur(15px);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #f39c12;
+            font-size: 28px;
+        }
+
+        .assessment, .result {
+            display: none;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: rgba(52, 73, 94, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .question span {
+            font-size: 16px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .option {
+            background-color: #3a506b;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px 0;
+            transition: background-color 0.3s ease;
+        }
+        video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .option:hover {
+            background-color: #4a6578;
+        }
+
+        .option.selected {
+            background-color: #00bcd4;
+        }
+
+        .btn {
+            background-color: #00bcd4;
+            color: white;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background-color: #0097a7;
+        }
+
+        .pdf-btn {
+            background-color: #ff9800;
+        }
+
+        .pdf-btn:hover {
+            background-color: #f57c00;
+        }
+
+        .start-button {
+            text-align: center;
+        }
+
+        .start-button button {
+            background-color: #00bcd4;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+
+        .start-button button:hover {
+            background-color: #0097a7;
+        }
+
+        #reportContent {
+            display: none; /* Hide the report content for PDF generation */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .btn {
+                font-size: 14px;
+                padding: 10px;
+            }
+
+            .option {
+                font-size: 14px;
+            }
+
+            .start-button button {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <video autoplay muted loop>
+    <source src="bg.mp4" type="video/mp4">
+</video>
+
+    <div class="container">
+        <h1>Sleep Assessment</h1>
+
+        <div class="start-button">
+            <button onclick="startAssessment()">Start Assessment</button>
+        </div>
+
+        <div class="assessment">
+            <div id="questions"></div>
+        </div>
+
+        <div class="result">
+            <p id="assessmentResult"></p>
+            <button class="btn pdf-btn" onclick="downloadReport()">Download Report</button>
+        </div>
+    </div>
+
+    <!-- Hidden content for PDF -->
+    <div id="reportContent">
+        <h2 style="text-align: center;">Sleep Analysis Report</h2>
+        <p><strong>Generated On:</strong> <span id="reportDate"></span></p>
+        <p><strong>Heart Rate:</strong> Max: <span id="heartMax"></span> BPM, Min: <span id="heartMin"></span> BPM</p>
+        <p><strong>Oxygen Levels:</strong> Max: <span id="oxygenMax"></span>%, Min: <span id="oxygenMin"></span>%</p>
+        <p><strong>Assessment:</strong> <span id="assessmentStatus"></span></p>
+        <canvas id="heartRateChart" width="400" height="200"></canvas>
+        <canvas id="oxygenChart" width="400" height="200"></canvas>
+    </div>
+
+    <script>
+        const questions = [
+            "How often do you have difficulty falling asleep?",
+            "How often do you wake up during the night and have trouble going back to sleep?",
+            "Do you feel tired during the day even after a full night’s sleep?",
+            "How many hours of sleep do you get on average each night?",
+            "Do you snore or has anyone told you that you snore loudly?",
+            "Do you experience nightmares or vivid dreams frequently?",
+            "Do you use electronic devices right before bedtime?",
+            "Do you consume caffeine or energy drinks late in the day?",
+            "Do you wake up earlier than you want and can't fall back asleep?",
+            "Do you have a consistent bedtime routine?"
+        ];
+
+        let currentQuestion = 0;
+        let abnormalCount = 0;
+
+        function startAssessment() {
+            document.querySelector('.start-button').style.display = 'none';
+            document.querySelector('.assessment').style.display = 'block';
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const questionContainer = document.getElementById('questions');
+            questionContainer.innerHTML = `
+                <div class="question">
+                    <span>${questions[currentQuestion]}</span>
+                    <div class="options">
+                        <div class="option" onclick="answerQuestion('normal')">Rarely</div>
+                        <div class="option" onclick="answerQuestion('normal')">Sometimes</div>
+                        <div class="option" onclick="answerQuestion('abnormal')">Often</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function answerQuestion(answer) {
+            if (answer === 'abnormal') abnormalCount++;
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                renderQuestion();
+            } else {
+                const result = abnormalCount >= 5 
+                    ? `<span style="color: #f44336; font-weight: bold;">Abnormal - Healthcare worker attention required</span>` 
+                    : `<span style="color: #00bcd4;">Normal - No major issues found</span>`;
+                document.querySelector('.assessment').style.display = 'none';
+                document.querySelector('.result').style.display = 'block';
+                document.getElementById('assessmentResult').innerHTML = result;
+            }
+        }
+
+        function downloadReport() {
+            if (abnormalCount >= 5) {
+                // Download abnormal report
+                window.location.href = "https://drive.google.com/uc?export=download&id=1a1lp5rLS-AAUhfUeHjUhMG7sMs27UPN5";
+            } else {
+                // Download normal report
+                window.location.href = "https://drive.google.com/uc?export=download&id=1aI-dXYbrYF5gIPrX2ozxhtJatMM1U7nq";
+            }
+        }
+    </script>
+
+</body>
+</html>
