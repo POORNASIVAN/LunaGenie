@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Music Player</title>
+  <style>
+    /* General Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    /* Body and Page Layout */
+    body {
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      margin: 0;
+    }
+
+    /* Container to center the content */
+    .container {
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    /* Music Player Section */
+    .music-player {
+      
+      backdrop-filter: blur(10px); 
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .music-info h1 {
+      margin-bottom: 15px;
+      font-size: 2rem;
+      color: #fff;
+    }
+
+    /* Play/Pause Button */
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .playBtn {
+      background-color: white;
+      color: #fff;
+      font-size: 90px;
+      border: 2;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-bottom: 20px;
+      transition: transform 0.2s;
+    }
+
+    .playBtn:hover {
+      transform: scale(1.1);
+    }
+
+    .volume-controls {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .volumeBtn {
+      background-color: black;
+      color: #fff;
+      font-size: 20px;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0 5px;
+    }
+
+    .volumeBtn:hover {
+      background-color: black;
+    }
+
+    .volumeSlider {
+      width: 150px;
+      margin: 0 10px;
+    }
+
+    /* Timer Section */
+    .timer {
+      margin-top: 20px;
+    }
+
+    #timerInput {
+      background-color: black;
+      color: #fff;
+      border: 1px solid #444;
+      padding: 5px 10px;
+      border-radius: 5px;
+      width: 80px;
+      text-align: center;
+    }
+
+    #startTimerBtn {
+      background-color: black;
+      color: #fff;
+      padding: 8px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    #startTimerBtn:hover {
+      background-color: #666;
+    }
+
+    #timerDisplay {
+      margin-top: 10px;
+      font-size: 16px;
+      color: #fff;
+    }
+
+    /* Back Button */
+    .back-button {
+      margin-top: 20px;
+    }
+
+    .backBtn {
+      background-color: black;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 5px;
+      text-decoration: none;
+    }
+
+    .backBtn:hover {
+      background-color: #666;
+    }
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <video autoplay muted loop playsinline>
+  <source src="bg.mp4" type="video/mp4">
+  
+</video>
+  <div class="container">
+    <div class="music-player">
+      <div class="music-info">
+        <h1>Story Teller</h1>
+        <audio id="audio" autoplay>
+          <source src="deepsleep1.mp4" type="audio/mp3">
+        </audio>
+      </div>
+
+      <!-- Controls -->
+      <div class="controls">
+        <button id="playPauseBtn" class="playBtn"><i class="fas fa-play"></i></button>
+        <div class="volume-controls">
+          <button id="volumeDown" class="volumeBtn">-</button>
+          <input type="range" id="volumeControl" class="volumeSlider" min="0" max="1" step="0.01" value="0.5">
+          <button id="volumeUp" class="volumeBtn">+</button>
+        </div>
+        <div class="timer">
+          <input type="number" id="timerInput" placeholder="Set time in seconds" min="1" max="300">
+          <button id="startTimerBtn">Start Timer</button>
+          <div id="timerDisplay">Time left: 0s</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="back-button">
+      <a href="s.html" class="backBtn">Back to Home</a>
+    </div>
+  </div>
+
+  <script>
+    // Get the necessary elements
+    const playPauseBtn = document.getElementById("playPauseBtn");
+    const audio = document.getElementById("audio");
+    const volumeControl = document.getElementById("volumeControl");
+    const volumeDown = document.getElementById("volumeDown");
+    const volumeUp = document.getElementById("volumeUp");
+    const timerInput = document.getElementById("timerInput");
+    const startTimerBtn = document.getElementById("startTimerBtn");
+    const timerDisplay = document.getElementById("timerDisplay");
+
+    let isPlaying = true;
+    let timerInterval;
+    let timerSeconds = 0;
+
+    // Toggle play/pause
+    playPauseBtn.addEventListener("click", () => {
+      if (isPlaying) {
+        audio.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+      } else {
+        audio.play();
+        playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    // Volume control
+    volumeControl.addEventListener("input", () => {
+      audio.volume = volumeControl.value;
+    });
+
+    volumeDown.addEventListener("click", () => {
+      audio.volume = Math.max(0, audio.volume - 0.1);
+      volumeControl.value = audio.volume;
+    });
+
+    volumeUp.addEventListener("click", () => {
+      audio.volume = Math.min(1, audio.volume + 0.1);
+      volumeControl.value = audio.volume;
+    });
+
+    // Timer functionality
+    startTimerBtn.addEventListener("click", () => {
+      const timeInSeconds = parseInt(timerInput.value);
+      if (isNaN(timeInSeconds) || timeInSeconds <= 0) {
+        alert("Please enter a valid time.");
+        return;
+      }
+      timerSeconds = timeInSeconds;
+      timerDisplay.innerText = `Time left: ${timerSeconds}s`;
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+    });
+
+    function updateTimer() {
+      if (timerSeconds > 0) {
+        timerSeconds--;
+        timerDisplay.innerText = `Time left: ${timerSeconds}s`;
+      } else {
+        clearInterval(timerInterval);
+        audio.pause();
+        playPauseBtn.innerHTML = '<i class="fas fa-play"></i>';
+        alert("Timer finished! Audio has been paused.");
+      }
+    }
+
+    // Initialize audio on page load
+    window.onload = () => {
+      audio.play();
+      playPauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    };
+  </script>
+</body>
+</html>
