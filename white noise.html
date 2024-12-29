@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Button Grid with Music Player</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #121212;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.8);
+            position: sticky;
+            top: 0;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+            padding: 20px;
+            width: 90%;
+            height: calc(100vh - 180px); /* Adjust for header */
+            overflow-y: auto;
+            position: relative;
+            justify-content: center;
+        }
+
+        .grid-item {
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out, filter 0.3s ease;
+            backdrop-filter: blur(10px);
+            height: 250px;
+        }
+
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .grid-item span {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .grid-item:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .grid-item:hover span {
+            opacity: 1;
+        }
+
+        /* Button 1 - Larger */
+        .grid-item:nth-child(1) {
+            grid-column: span 2;
+            grid-row: span 2;
+        }
+
+        /* Button 7 and 8 in Row 2 */
+        .grid-item:nth-child(7), .grid-item:nth-child(8) {
+            grid-column: span 1;
+        }
+
+        /* Scroll styling */
+        .grid-container::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .grid-container::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .grid-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Centering and Responsive */
+        .scrollable-container {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Add smooth transitions */
+        .grid-item {
+            transition: transform 0.3s ease, filter 0.3s ease, backdrop-filter 0.3s ease;
+        }
+
+        video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        /* Mobile View */
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr; /* Stack items vertically */
+                grid-template-rows: auto;
+            }
+
+            .grid-item {
+                width: 100%;
+                height: 200px; /* Adjust height for mobile view */
+                margin-bottom: 20px;
+            }
+
+            .grid-item:nth-child(1) {
+                grid-column: span 1;
+                grid-row: span 1;
+            }
+        }
+
+        /* Very Small Devices */
+        @media (max-width: 480px) {
+            .grid-item {
+                height: 180px;
+            }
+        }
+
+        /* Stop and Mix Buttons */
+        #stop-button, #mix-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ff4747;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            border: none;
+            z-index: 10;
+        }
+
+        #mix-button.active {
+            background-color: #28a745;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    
+</header>
+<video autoplay muted loop>
+    <source src="bg.mp4" type="video/mp4">
+</video>
+
+<!-- Stop Button -->
+<button id="stop-button" onclick="stopAudio()">Stop</button>
+
+<!-- Mix Button -->
+<button id="mix-button" onclick="toggleMix()">Mix</button>
+
+<div class="scrollable-container">
+    <div class="grid-container">
+        <!-- Each Button -->
+        <div class="grid-item" onclick="playAudio('audio1')">
+            <img src="rain.jpg" alt="Image 1">
+            <span>Rain</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio2')">
+            <img src="asmr.jpg" alt="Image 2">
+            <span>ASMR</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio3')">
+            <img src="nat.jpg" alt="Image 3">
+            <span>Nature</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio4')">
+            <img src="mus.jpg" alt="Image 4">
+            <span>Melody</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio5')">
+            <img src="ani.jpg" alt="Image 5">
+            <span>Animal</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio6')">
+            <img src="lily.jpg" alt="Image 6">
+            <span>Lily</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio7')">
+            <img src="wat.jpg" alt="Image 7">
+            <span>Noise</span>
+        </div>
+        <div class="grid-item" onclick="playAudio('audio8')">
+            <img src="fire.jpg"alt="Image 8">
+            <span>Fire</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize variables for audio and mixing state
+    let currentAudio = null;
+    let isMixing = false;
+    let audioFiles = {
+        'audio1': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        'audio2': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        'audio3': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3',
+        'audio4': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3',
+        'audio5': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3',
+        'audio6': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3',
+        'audio7': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3',
+        'audio8': 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3',
+    };
+    let audioElements = {};
+
+    // Load all audio elements
+    for (let key in audioFiles) {
+        audioElements[key] = new Audio(audioFiles[key]);
+    }
+
+    // Play audio when a button is clicked
+    function playAudio(audioId) {
+        if (isMixing) {
+            stopMix(); // Turn off mixing when any button is clicked
+        }
+        if (currentAudio) {
+            currentAudio.pause(); // Stop previous audio
+        }
+        currentAudio = audioElements[audioId];
+        currentAudio.play();
+    }
+
+    // Stop current audio
+    function stopAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+        }
+    }
+
+    // Start/stop shuffle mode (Mixing)
+    function toggleMix() {
+        isMixing = !isMixing;
+        const mixButton = document.getElementById('mix-button');
+        mixButton.classList.toggle('active', isMixing);
+
+        if (isMixing) {
+            startMixing();
+        } else {
+            stopMix();
+        }
+    }
+
+    // Start the mix (shuffle and play random audio)
+    function startMixing() {
+        let randomAudioId = getRandomAudioId();
+        playAudio(randomAudioId);
+    }
+
+    // Stop the mix (stop any ongoing audio)
+    function stopMix() {
+        stopAudio();
+    }
+
+    // Get a random audio id from the available audio elements
+    function getRandomAudioId() {
+        let keys = Object.keys(audioFiles);
+        return keys[Math.floor(Math.random() * keys.length)];
+    }
+</script>
+
+</body>
+</html>

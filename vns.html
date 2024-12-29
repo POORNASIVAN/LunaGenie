@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotary Dial with Firebase</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(145deg, #0f0f0f, #1c1c1c);
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: black;
+            color: white;
+            border: 2px solid #444;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .back-button:hover {
+            background: #444;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dial {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 15px solid #222;
+            border-radius: 50%;
+            background: radial-gradient(circle, #333, #000);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: none; /* Disable touch action for mobile */
+        }
+
+        .dial-rotator {
+            position: absolute;
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #444, #222);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5), inset 0 5px 10px rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-origin: center;
+            transition: transform 0.1s linear;
+        }
+
+        .dial-markings {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dial-markings span {
+            position: absolute;
+            font-size: 14px;
+            color: #888;
+            transform-origin: center;
+        }
+
+        .value-display {
+            margin-top: 20px;
+            font-size: 36px;
+            font-weight: bold;
+            color: #00bcd4;
+            transition: color 0.3s;
+        }
+
+        .sound-wave {
+            position: absolute;
+            bottom: 0;
+            display: flex;
+            width: 100%;
+            height: 100px;
+            justify-content: space-around;
+            align-items: flex-end;
+            overflow: hidden;
+        }
+
+        .sound-wave div {
+            width: 5px;
+            height: 20px;
+            background: #00bcd4;
+            animation: wave-animation 1s infinite;
+        }
+
+        .sound-wave div:nth-child(2n) {
+            animation-delay: 0.2s;
+        }
+
+        .sound-wave div:nth-child(3n) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes wave-animation {
+            0%, 100% {
+                height: 20px;
+            }
+            50% {
+                height: 60px;
+            }
+        }
+
+        /* Mobile optimization */
+        @media (max-width: 768px) {
+            .dial {
+                width: 250px;
+                height: 250px;
+            }
+            .value-display {
+                font-size: 28px;
+            }
+        }
+
+        .reset-button {
+            margin-top: 20px;
+            background-color: #f44336;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s;
+        }
+
+        .reset-button:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='sa.html'">Back</button>
+    <div class="sound-wave">
+        <div></div><div></div><div></div><div></div><div></div>
+        <div></div><div></div><div></div><div></div><div></div>
+    </div>
+    <div class="container">
+        <div class="dial" id="dial">
+            <div class="dial-rotator" id="rotator"></div>
+            <div class="dial-markings" id="markings"></div>
+        </div>
+        <div class="value-display" id="valueDisplay">0</div>
+        <button class="reset-button" id="resetButton">Reset</button>
+    </div>
+
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJ8cXMan4Hu_KnfdV_ulwEHZbpy05aISo",
+            authDomain: "iot-luna.firebaseapp.com",
+            databaseURL: "https://iot-luna-default-rtdb.firebaseio.com",
+            projectId: "iot-luna",
+            storageBucket: "iot-luna.firebasestorage.app",
+            messagingSenderId: "85920498762",
+            appId: "1:85920498762:web:d6b9bc6f729e05d45252b3",
+            measurementId: "G-CSXKF3KE9R"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        const dial = document.getElementById('dial');
+        const rotator = document.getElementById('rotator');
+        const valueDisplay = document.getElementById('valueDisplay');
+        const soundWaves = document.querySelectorAll('.sound-wave div');
+        const resetButton = document.getElementById('resetButton');
+
+        let currentValue = 0;
+
+        function updateDial() {
+            const rotation = (currentValue / 100) * 360;
+            rotator.style.transform = `rotate(${rotation}deg)`;
+            valueDisplay.textContent = currentValue;
+
+            if (currentValue <= 25) {
+                valueDisplay.style.color = '#00bcd4';
+                soundWaves.forEach((wave) => wave.style.background = '#00bcd4');
+            } else if (currentValue <= 65) {
+                valueDisplay.style.color = '#ff9800';
+                soundWaves.forEach((wave) => wave.style.background = '#ff9800');
+            } else {
+                valueDisplay.style.color = '#f44336';
+                soundWaves.forEach((wave) => wave.style.background = '#f44336');
+            }
+
+            // Insert value into Firebase
+            db.ref("vnc").push(currentValue);
+        }
+
+        function setupDialMarkings() {
+            const markings = document.getElementById('markings');
+            for (let i = 0; i <= 100; i += 10) {
+                const span = document.createElement('span');
+                span.textContent = i;
+                const angle = (i / 100) * 360;
+                span.style.transform = `rotate(${angle}deg) translate(0, -140px) rotate(${-angle}deg)`;
+                markings.appendChild(span);
+            }
+        }
+
+        dial.addEventListener('mousedown', (e) => {
+            const rect = dial.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            function onMouseMove(event) {
+                const dx = event.clientX - cx;
+                const dy = event.clientY - cy;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 180;
+                currentValue = Math.min(Math.max(Math.round((angle / 360) * 100), 0), 100);
+                updateDial();
+            }
+
+            function onMouseUp() {
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            }
+
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        });
+
+        // Mobile touch support
+        dial.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const rect = dial.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+
+            function onTouchMove(event) {
+                const dx = event.touches[0].clientX - cx;
+                const dy = event.touches[0].clientY - cy;
+                const angle = Math.atan2(dy, dx) * (180 / Math.PI) + 180;
+                currentValue = Math.min(Math.max(Math.round((angle / 360) * 100), 0), 100);
+                updateDial();
+            }
+
+            function onTouchEnd() {
+                window.removeEventListener('touchmove', onTouchMove);
+                window.removeEventListener('touchend', onTouchEnd);
+            }
+
+            window.addEventListener('touchmove', onTouchMove);
+            window.addEventListener('touchend', onTouchEnd);
+        });
+
+        resetButton.addEventListener('click', () => {
+            currentValue = 0;
+            updateDial();
+        });
+
+        // Initialize
+        updateDial();
+        setupDialMarkings();
+    </script>
+</body>
+</html>
