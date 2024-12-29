@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Random Data Generator</title>
+  <script type="module">
+    
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+    import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+
+  
+    const firebaseConfig = {
+      apiKey: "AIzaSyCJ8cXMan4Hu_KnfdV_ulwEHZbpy05aISo",
+      authDomain: "iot-luna.firebaseapp.com",
+      databaseURL: "https://iot-luna-default-rtdb.firebaseio.com",
+      projectId: "iot-luna",
+      storageBucket: "iot-luna.appspot.com",
+      messagingSenderId: "85920498762",
+      appId: "1:85920498762:web:d6b9bc6f729e05d45252b3",
+      measurementId: "G-CSXKF3KE9R"
+    };
+
+
+    const app = initializeApp(firebaseConfig);
+    const database = getDatabase(app);
+
+    function updateFirebaseData() {
+      const heartrate = Math.floor(Math.random() * (80 - 60 + 1) + 60); 
+      const oxygen = Math.floor(Math.random() * (100 - 95 + 1) + 95);  
+      
+      const heartrateRef = ref(database, 'heartrate');
+      const oxygenRef = ref(database, 'oxygen');
+
+     
+      set(heartrateRef, heartrate)
+        .then(() => console.log('Heart rate updated:', heartrate))
+        .catch((error) => console.error('Error updating heart rate:', error));
+
+      set(oxygenRef, oxygen)
+        .then(() => console.log('Oxygen saturation updated:', oxygen))
+        .catch((error) => console.error('Error updating oxygen saturation:', error));
+    }
+
+    
+    setInterval(updateFirebaseData, 5000);
+  </script>
+</head>
+<body>
+  <h1 style="text-align: center; color: #333;">Random Data Generator</h1>
+  <p style="text-align: center;">This script updates random heart rate and oxygen saturation values to Firebase every 5 seconds.</p>
+</body>
+</html>
