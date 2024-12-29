@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breathing Exercise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: #121212;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        video {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+  }
+
+        .container {
+            text-align: center;
+            position: relative;
+        }
+
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #6f42c1, #d63384);
+            color: #fff;
+            border: none;
+            border-radius: 50px;
+            font-size: 24px;
+            padding: 15px 40px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .circle {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #1e1e1e, #333);
+            border: 5px solid #6f42c1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin: 0 auto;
+        }
+
+        .circle-label {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            z-index: 10;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .countdown {
+            font-size: 48px;
+            font-weight: bold;
+            color: #6f42c1;
+            margin-bottom: 20px;
+        }
+
+        @keyframes expand {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.5);
+            }
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+
+        .animate {
+            animation: expand 3s infinite;
+        }
+    </style>
+</head>
+<body>
+    <video autoplay muted loop playsinline>
+  <source src="bg.mp4" type="video/mp4">
+  
+</video>
+    <button class="back-button" onclick="window.location.href='home.html'">Back</button>
+    <div class="container">
+        <div class="countdown" id="countdown"></div>
+        <button class="start-btn" id="startButton">Start</button>
+        <div class="circle" id="breathingCircle" style="display: none;">
+            <div class="circle-label" id="circleLabel">Relax</div>
+        </div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById("startButton");
+        const countdown = document.getElementById("countdown");
+        const breathingCircle = document.getElementById("breathingCircle");
+        const circleLabel = document.getElementById("circleLabel");
+
+        let breathingInterval;
+
+        function startBreathingExercise() {
+            countdown.style.opacity = 1;
+            let timer = 3;
+
+            const countDownInterval = setInterval(() => {
+                countdown.textContent = timer;
+                timer--;
+                if (timer < 0) {
+                    clearInterval(countDownInterval);
+                    countdown.style.opacity = 0;
+                    beginBreathing();
+                }
+            }, 1000);
+        }
+
+        function beginBreathing() {
+            startButton.style.display = "none";
+            breathingCircle.style.display = "flex";
+            breathingInterval = setInterval(() => {
+                circleLabel.textContent = "Breathe In";
+                breathingCircle.classList.add("animate");
+                setTimeout(() => {
+                    circleLabel.textContent = "Hold";
+                    breathingCircle.classList.remove("animate");
+                }, 3000); // 3 seconds for breathing in
+                setTimeout(() => {
+                    circleLabel.textContent = "Breathe Out";
+                    breathingCircle.classList.add("animate");
+                }, 8000); // 5 seconds random hold + 3 seconds breathing out
+            }, 11000); // Total 11 seconds per cycle
+        }
+
+        startButton.addEventListener("click", () => {
+            startBreathingExercise();
+        });
+    </script>
+</body>
+</html>
